@@ -1,0 +1,10 @@
+Ukrainian Russion English French German
+мама мама mother mère Mutter
+тато папа father papa Papa
+син сын son fils Sohn
+дочка дочь daughter fille Tochter
+кіт кот cat chat Katze
+собака собака dog chien Hund
+пташка птица bird oiseau Vogel
+сонце солнце sun Soleil Sonne
+небо небо sky ciel Himmel
