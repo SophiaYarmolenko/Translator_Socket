@@ -31,8 +31,7 @@ public class Server
             {
                 word = in.readLine();
                 language = in.readLine();
-                System.out.println("word2 = " + word);
-                System.out.println("language2 = " + language);
+               
                 if( translator.getTranslation(language, word) == null )
                 {
                     out.println("Sorry, we can`t find this word in our dictionary");
