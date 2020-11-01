@@ -1,4 +1,3 @@
-package com.company;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -39,6 +38,8 @@ public class Translator
 
     public String getTranslation (String requiredLanguage, String word)
     {
+        if(dictionary.get(word) == null || dictionary.get(word).get(requiredLanguage) == null)
+            return null;
         return dictionary.get(word).get(requiredLanguage);
     }
 }
