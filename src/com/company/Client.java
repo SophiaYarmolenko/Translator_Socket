@@ -1,51 +1,70 @@
 package com.company;
 import java.io.*;
 import java.net.Socket;
+import java.util.Date;
+import java.util.Scanner;
 
 public class Client
 {
+    private Socket clientSocket;
+    private PrintWriter out;
+    private BufferedReader in;
+    private FileWriter fileWriter = new FileWriter(new File("history.txt"));
 
-    private static Socket clientSocket;
-    private static BufferedReader reader;
-    private static BufferedReader in;
-    private static BufferedWriter out;
+    private static final String HOST = "localhost";
+    private static final int PORT = 1033;
 
-    public static void main(String[] args)
+    public Client() throws IOException {
+    }
+
+    public void start(String host, int port) throws IOException
     {
         try
         {
-            try
-            {
-                clientSocket = new Socket("localhost", 1033);
-                reader = new BufferedReader(new InputStreamReader(System.in));
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-
-                System.out.println("Hi! Give me a word to translate ( you can choose one of this language: Ukrainian, Russian, English, French, German ): " );
-                String word = reader.readLine();
-                out.write(word + "\n");
-
-                System.out.println("Ok! Now I need a language to translate into ( Ukrainian, Russian, English, French, German ): " );
-                String language = reader.readLine();
-                out.write(language + "\n");
-
-                out.flush();
-
-                String serverResult = in.readLine();
-                System.out.println(serverResult);
-            }
-            finally
-            {
-                System.out.println("Bye!");
-                clientSocket.close();
-                in.close();
-                out.close();
-            }
+            clientSocket = new Socket(host, port);
+            out = new PrintWriter(clientSocket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         }
         catch (IOException e)
         {
-            System.err.println(e);
+            in.close();
+            out.close();
+            clientSocket.close();
         }
+    }
 
+    public String sendWordAndLanguage(String word, String language) throws IOException
+    {
+        out.println(word + "\n" + language);
+        String serverTranslation = in.readLine();
+        return serverTranslation;
+    }
+
+    public static void main(String[] args) throws IOException
+    {
+        Date date = new Date();
+        Scanner scanner = new Scanner((System.in));
+
+        Client client = new Client();
+        client.start(HOST, PORT);
+        String word;
+        String language;
+
+        client.fileWriter.append(date.toString() + " > " + "word for translation (English, French, German, Russian, Ukrainian):" );
+        System.out.println("word for translation (English, French, German, Russian, Ukrainian):");
+        while (scanner.hasNext())
+        {
+            word = scanner.nextLine();
+            client.fileWriter.append(date.toString() + " > " + word);
+            System.out.println("translation language (English, French, German, Russian, Ukrainian):");
+            language = scanner.nextLine();
+            client.fileWriter.append(date.toString() + " > " + language);
+            String serverResult = client.sendWordAndLanguage(word, language);
+            System.out.println(serverResult);
+            client.fileWriter.append(date.toString() + " > " + serverResult);
+            System.out.println("word for translation (English, French, German, Russian, Ukrainian):");
+            client.fileWriter.append(date.toString() + " > " + "word for translation (English, French, German, Russian, Ukrainian):");
+        }
+        client.fileWriter.close();
     }
 }
