@@ -1,69 +1,61 @@
 package com.company;
+
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 
 public class Server
 {
-    private static Socket clientSocket;
-    private static ServerSocket server;
-    private static BufferedReader in;
-    private static BufferedWriter out;
-    private static Translator translator;
+    private ServerSocket serverSocket;
+    private Socket clientSocket;
+    private PrintWriter out;
+    private BufferedReader in;
 
-    static
+    Translator translator = new Translator();
+
+    private static final int PORT = 1033;
+
+    public Server() throws IOException { }
+
+    public void start(int port) throws IOException
     {
         try
         {
-            translator = new Translator();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
+            serverSocket = new ServerSocket(port);
+            clientSocket = serverSocket.accept();
+            out = new PrintWriter(clientSocket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-    public static void main(String[] args)
-    {
-        try
-        {
-            try
+            String word;
+            String language;
+            while (true)
             {
-                server = new ServerSocket(1033);
-                System.out.println("Ready to translate!");
-
-                clientSocket = server.accept();
-                try
+                word = in.readLine();
+                language = in.readLine();
+                System.out.println("word2 = " + word);
+                System.out.println("language2 = " + language);
+                if( translator.getTranslation(language, word) == null )
                 {
-                    in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-
-                    String word = in.readLine();
-                    String language = in.readLine();
-
-                    if( translator.getTranslation(language, word) == null )
+                    out.println("Sorry, we can`t find this word in our dictionary");
+                }
+                else
                     {
-                        out.write("Sorry, we did not find this word in our dictionary");
+                        String translation = translator.getTranslation(language, word);
+                        out.println("Ok, your result: " + word + " + " + language + " -> " + translation);
                     }
-                    out.write("Ok, your result: " + word + " + " + language + " -> " + translator.getTranslation(language, word));
-                    out.flush();
-                }
-                finally
-                {
-                    clientSocket.close();
-                    in.close();
-                    out.close();
-                }
-            }
-            finally
-            {
-                System.out.println("Bye!");
-                server.close();
             }
         }
         catch (IOException e)
         {
-            System.err.println(e);
+            in.close();
+            out.close();
+            clientSocket.close();
+            serverSocket.close();
         }
+
+    }
+    public static void main(String[] args) throws IOException
+    {
+        Server server = new Server();
+        server.start(PORT);
     }
 }
