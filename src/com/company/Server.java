@@ -10,11 +10,12 @@ public class Server
     private PrintWriter out;
     private BufferedReader in;
 
-    Translator translator = new Translator();
+    GetTranslate translator = new GetTranslate();
 
     private static final int PORT = 1033;
+    private static final String EXIT = "exit";
 
-    public Server() throws IOException { }
+    public Server() throws IOException {}
 
     public void start(int port) throws IOException
     {
@@ -25,20 +26,22 @@ public class Server
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
+            String languageFrom;
+            String languageTo;
             String word;
-            String language;
-            while (true)
+            while (!EXIT.equals(languageFrom = in.readLine()))
             {
+                languageTo = in.readLine();
                 word = in.readLine();
-                language = in.readLine();
-                if( translator.getTranslation(language, word) == null )
+
+                if( translator.getTranslation(languageFrom, languageTo, word) == null )
                 {
-                    out.println("Sorry, we can`t find this word in our dictionary");
+                    out.println("Sorry, we can`t translate");
                 }
                 else
                     {
-                        String translation = translator.getTranslation(language, word);
-                        out.println("Ok, your result: " + word + " + " + language + " -> " + translation);
+                        String translation = translator.getTranslation(languageFrom, languageTo, word);
+                        out.println("Ok, your result: " + translation);
                     }
             }
         }
